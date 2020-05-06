@@ -1,4 +1,6 @@
 import os
+from os.path import join, exists
+from os import mkdir, listdir
 import numpy as np
 import matplotlib.pyplot as plt
 from model import get_model
@@ -6,18 +8,33 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras import optimizers
 
-from face_detection_operation import get_detected_face
+
+import glob
+from mtcnn import MTCNN
+from PIL import Image
+import cv2
+
+def get_detected_face(filename, required_size=(224, 224)):
+    img = cv2.imread(filename)
+    detector = MTCNN()
+    results = detector.detect_faces(img)
+    x, y, width, height = results[0]['box']
+    face = img[y:y + height, x:x + width]
+    image = Image.fromarray(face)
+    image = image.resize(required_size)
+    face_array = np.asarray(image)
+    return face_array, face
 
 
 class FaceRecognition:
 
     def __init__(self):
-        self.TRAINING_DATA_DIRECTORY = "./dataset/training"
+        self.TRAINING_DATA_DIRECTORY = "./dataset"
         self.TESTING_DATA_DIRECTORY = "./dataset/testing"
         self.EPOCHS = 50
-        self.BATCH_SIZE = 32
-        self.NUMBER_OF_TRAINING_IMAGES = 320
-        self.NUMBER_OF_TESTING_IMAGES = 196
+        self.BATCH_SIZE = 5
+        self.NUMBER_OF_TRAINING_IMAGES = 85
+        self.NUMBER_OF_TESTING_IMAGES = 85
         self.IMAGE_HEIGHT = 224
         self.IMAGE_WIDTH = 224
         self.model = get_model()
@@ -73,11 +90,11 @@ class FaceRecognition:
 
         history = self.model.fit_generator(
             self.training_generator,
-            steps_per_epoch=self.NUMBER_OF_TRAINING_IMAGES//self.BATCH_SIZE,
+            # steps_per_epoch=self.NUMBER_OF_TRAINING_IMAGES//self.BATCH_SIZE,
             epochs=self.EPOCHS,
             validation_data=testing_generator,
             shuffle=True,
-            validation_steps=self.NUMBER_OF_TESTING_IMAGES//self.BATCH_SIZE
+            # validation_steps=self.NUMBER_OF_TESTING_IMAGES//self.BATCH_SIZE
         )
 
         FaceRecognition.plot_training(history)
