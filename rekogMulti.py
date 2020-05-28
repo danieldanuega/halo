@@ -1,24 +1,62 @@
 import cv2
 from mtcnn import MTCNN
 
+F=30
+
+def gstreamer_pipeline(
+    capture_width=640,
+    capture_height=480,
+    display_width=640,
+    display_height=480,
+    framerate=F,
+    flip_method=0,
+):
+    return (
+        "nvarguscamerasrc ! "
+        "video/x-raw(memory:NVMM), "
+        "width=(int)%d, height=(int)%d, "
+        "format=(string)NV12, framerate=(fraction)%d/1 ! "
+        "nvvidconv flip-method=%d ! "
+        "video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! "
+        "videoconvert ! "
+        "video/x-raw, format=(string)BGR ! appsink"
+        % (
+            capture_width,
+            capture_height,
+            framerate,
+            flip_method,
+            display_width,
+            display_height,
+        )
+    )
+
 detector = MTCNN()
 
-video = cv2.VideoCapture(0)
+# Using webcam
+# video = cv2.VideoCapture(0)
+# Using gstreamer
+video = cv2.VideoCapture(gstreamer_pipeline(), cv2.CAP_GSTREAMER)
+
 if not video.isOpened():
     print('Error opening the camera')
-
+n = 0
 while True:
     # Open the camera
     ret, frame = video.read()
 
-    # Resize the frame size and convert it to RGB Color
-    small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
-    rgb_small_frame = frame[:, :, ::-1]
+    if n == F:
+       n = 0
 
-    # Detect the face from rgb input
-    results = detector.detect_faces(rgb_small_frame)
+    n+=1
+    if n==1:
+      # Resize the frame size and convert it to RGB Color
+      small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
+      rgb_small_frame = frame[:, :, ::-1]
 
-    if results:
+      # Detect the face from rgb input
+      results = detector.detect_faces(rgb_small_frame)
+
+      if results:
         for face in results:
             bounding_box = face['box']
             keypoints = face['keypoints']
