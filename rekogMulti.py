@@ -1,5 +1,7 @@
 import cv2
 from mtcnn import MTCNN
+from PIL import Image
+import numpy as np
 
 # n -> fps count
 # F -> desired framerate
@@ -7,6 +9,7 @@ from mtcnn import MTCNN
 n = 0
 F = 30
 i = 0
+required_size = (224,224)
 
 def gstreamer_pipeline(
     capture_width=640,
@@ -66,20 +69,27 @@ while True:
             for face in results:
                 bounding_box = face['box']
                 keypoints = face['keypoints']
+                x, y, width, height = bounding_box
                 
-                # Save the image
-                face_frame = frame[
-                    bounding_box[1]:bounding_box[1]+bounding_box[3], 
-                    bounding_box[0]:bounding_box[0]+bounding_box[2]
-                    ].copy()
-                filename = 'dataset/temp/img' + str(i) + '.jpg'
-                cv2.imwrite(filename, face_frame)
+                # Save and resize image 
+                face_frame = frame[y:y+height, x:x+width].copy()
+                try:
+                    face_image = Image.fromarray(face_frame)
+                except ValueError:
+                    continue
+                face_image = face_image.resize(required_size)
+                face_array = np.asarray(face_image)
+                filename = 'temp/img' + str(i) + '.jpg'
+                try:
+                    cv2.imwrite(filename, face_array)
+                except AssertionError as err:
+                    print("Cannot write image: " + err)                    
                 print("Writing {} into temp".format(filename))
 
                 # Draw rectangle in face
                 cv2.rectangle(frame,
-                            (bounding_box[0], bounding_box[1]),
-                            (bounding_box[0]+bounding_box[2], bounding_box[1] + bounding_box[3]),
+                            (x, y),
+                            (x+width, y + height),
                             (0,155,255),
                             2)
                 
