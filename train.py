@@ -29,8 +29,8 @@ def get_detected_face(filename, required_size=(224, 224)):
 class FaceRecognition:
 
     def __init__(self):
-        self.TRAINING_DATA_DIRECTORY = "./dataset"
-        self.TESTING_DATA_DIRECTORY = "./dataset/testing"
+        self.TRAINING_DATA_DIRECTORY = "./dataset/train"
+        self.TESTING_DATA_DIRECTORY = "./dataset/test"
         self.EPOCHS = 50
         self.BATCH_SIZE = 5
         self.NUMBER_OF_TRAINING_IMAGES = 85
@@ -77,7 +77,7 @@ class FaceRecognition:
         )
 
         testing_generator = FaceRecognition.data_generator().flow_from_directory(
-            self.TRAINING_DATA_DIRECTORY,
+            self.TESTING_DATA_DIRECTORY,
             target_size=(self.IMAGE_WIDTH, self.IMAGE_HEIGHT),
             class_mode='categorical'
         )
@@ -139,3 +139,10 @@ class FaceRecognition:
                     class_name = v
 
         return class_name
+    
+# Call to train the model
+if __name__ == '__main__':
+    model_name = "face_recognition.h5"
+    faceRecognition = FaceRecognition()
+    faceRecognition.training()
+    faceRecognition.save_model(model_name)
