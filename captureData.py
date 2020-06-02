@@ -54,7 +54,7 @@ while True:
                 cv2.imwrite(filename, face_array)
             except AssertionError as err:
                 print("Cannot write image: " + err)                    
-            print("Writing {} into temp".format(filename))
+            print("Writing {} into dataset".format(filename))
 
             cv2.rectangle(frame,
                         (x, y),

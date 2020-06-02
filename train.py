@@ -14,16 +14,16 @@ from mtcnn import MTCNN
 from PIL import Image
 import cv2
 
-def get_detected_face(filename, required_size=(224, 224)):
-    img = cv2.imread(filename)
-    detector = MTCNN()
-    results = detector.detect_faces(img)
-    x, y, width, height = results[0]['box']
-    face = img[y:y + height, x:x + width]
-    image = Image.fromarray(face)
-    image = image.resize(required_size)
-    face_array = np.asarray(image)
-    return face_array, face
+# def get_detected_face(img, required_size=(224, 224)):
+#     detector = MTCNN()
+#     results = detector.detect_faces(img)
+#     for face in results:
+#         x, y, width, height = face['box']
+#         face = img[y:y + height, x:x + width]
+#         image = Image.fromarray(face)
+#         image = image.resize(required_size)
+#         face_array = np.asarray(image)
+#     return face_array, face
 
 
 class FaceRecognition:
@@ -31,10 +31,10 @@ class FaceRecognition:
     def __init__(self):
         self.TRAINING_DATA_DIRECTORY = "./dataset/train"
         self.TESTING_DATA_DIRECTORY = "./dataset/test"
-        self.EPOCHS = 50
-        self.BATCH_SIZE = 5
-        self.NUMBER_OF_TRAINING_IMAGES = 85
-        self.NUMBER_OF_TESTING_IMAGES = 85
+        self.EPOCHS = 10
+        self.BATCH_SIZE = 32
+        self.NUMBER_OF_TRAINING_IMAGES = 169
+        self.NUMBER_OF_TESTING_IMAGES = 120
         self.IMAGE_HEIGHT = 224
         self.IMAGE_WIDTH = 224
         self.model = get_model()
@@ -88,21 +88,19 @@ class FaceRecognition:
             metrics=["accuracy"]
         )
 
-        history = self.model.fit_generator(
+        history = self.model.fit(
             self.training_generator,
-            # steps_per_epoch=self.NUMBER_OF_TRAINING_IMAGES//self.BATCH_SIZE,
+            steps_per_epoch=self.NUMBER_OF_TRAINING_IMAGES//self.BATCH_SIZE,
             epochs=self.EPOCHS,
             validation_data=testing_generator,
             shuffle=True,
-            # validation_steps=self.NUMBER_OF_TESTING_IMAGES//self.BATCH_SIZE
+            validation_steps=self.NUMBER_OF_TESTING_IMAGES//self.BATCH_SIZE
         )
 
         FaceRecognition.plot_training(history)
 
     def save_model(self, model_name):
         model_path = "./model"
-        # if not os.path.exists(model_name):
-        #     os.mkdir(model_name)
         if not os.path.exists(model_path):
             os.mkdir(model_path)
 
@@ -121,9 +119,9 @@ class FaceRecognition:
         return model
 
     @staticmethod
-    def model_prediction(image_path, model_path, class_names_path):
+    def model_prediction(image, face_array, face, model_path, class_names_path):
         class_name = "None Class Name"
-        face_array, face = get_detected_face(image_path)
+        # face_array, face = get_detected_face(image)
         model = load_model(model_path)
         face_array = face_array.astype('float32')
         input_sample = np.expand_dims(face_array, axis=0)

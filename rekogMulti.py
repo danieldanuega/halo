@@ -1,7 +1,9 @@
+import os
 import cv2
 from mtcnn import MTCNN
 from PIL import Image
 import numpy as np
+from train import FaceRecognition as FR
 
 # n -> fps count
 # F -> desired framerate
@@ -10,6 +12,8 @@ n = 0
 F = 30
 i = 0
 required_size = (224,224)
+model_name = "face_recognition.h5" 
+class_name = "face_recognition_class_names.npy"
 
 def gstreamer_pipeline(
     capture_width=640,
@@ -71,7 +75,7 @@ while True:
                 keypoints = face['keypoints']
                 x, y, width, height = bounding_box
                 
-                # Save and resize image 
+                # Get and Resize face into (224,224)
                 face_frame = frame[y:y+height, x:x+width].copy()
                 try:
                     face_image = Image.fromarray(face_frame)
@@ -79,19 +83,20 @@ while True:
                     continue
                 face_image = face_image.resize(required_size)
                 face_array = np.asarray(face_image)
-                filename = 'temp/img' + str(i) + '.jpg'
-                try:
-                    cv2.imwrite(filename, face_array)
-                except AssertionError as err:
-                    print("Cannot write image: " + err)                    
-                print("Writing {} into temp".format(filename))
+                
+                # Predict the frame
+                pred = FR.model_prediction(frame, face_array, face_frame, os.path.join("model", model_name), os.path.join("model", class_name))
 
                 # Draw rectangle in face
                 cv2.rectangle(frame,
                             (x, y),
-                            (x+width, y + height),
+                            (x+width, y+height),
                             (0,155,255),
                             2)
+                
+                # Draw label class prediction
+                cv2.rectangle(frame, (x, y+height - 35), (x+width, y+height), (0, 0, 255), cv2.FILLED)
+                cv2.putText(frame, pred, (x + 6, y+height - 6), cv2.FONT_HERSHEY_DUPLEX, 0.8, (255, 255, 255), 1)
                 
                 # Draw pinpoint in eyes, node, and mouth
                 cv2.circle(frame,(keypoints['left_eye']), 2, (0,155,255), 2)

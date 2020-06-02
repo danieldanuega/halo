@@ -23,6 +23,6 @@ def get_model():
                     kernel_regularizer=regularizers.l2(0.),
                     activity_regularizer=regularizers.l2(0.)))
     model.add(Dropout(0.05))
-    model.add(Dense(85, activation='softmax'))
+    model.add(Dense(3, activation='softmax'))
     return model
     
