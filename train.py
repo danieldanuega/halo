@@ -31,10 +31,10 @@ class FaceRecognition:
     def __init__(self):
         self.TRAINING_DATA_DIRECTORY = "./dataset/train"
         self.TESTING_DATA_DIRECTORY = "./dataset/test"
-        self.EPOCHS = 10
+        self.EPOCHS = 50
         self.BATCH_SIZE = 32
-        self.NUMBER_OF_TRAINING_IMAGES = 169
-        self.NUMBER_OF_TESTING_IMAGES = 120
+        self.NUMBER_OF_TRAINING_IMAGES = 250
+        self.NUMBER_OF_TESTING_IMAGES = 50
         self.IMAGE_HEIGHT = 224
         self.IMAGE_WIDTH = 224
         self.model = get_model()
@@ -90,11 +90,11 @@ class FaceRecognition:
 
         history = self.model.fit(
             self.training_generator,
-            steps_per_epoch=self.NUMBER_OF_TRAINING_IMAGES//self.BATCH_SIZE,
+            # steps_per_epoch=self.NUMBER_OF_TRAINING_IMAGES//self.BATCH_SIZE,
             epochs=self.EPOCHS,
             validation_data=testing_generator,
             shuffle=True,
-            validation_steps=self.NUMBER_OF_TESTING_IMAGES//self.BATCH_SIZE
+            # validation_steps=2
         )
 
         FaceRecognition.plot_training(history)

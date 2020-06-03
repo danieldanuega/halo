@@ -18,11 +18,23 @@ def get_model():
     model.add(MaxPool2D(pool_size=(2, 2)))
     model.add(BatchNormalization())
     model.add(Dropout(0.05))
+    model.add(Conv2D(64, kernel_size=3, activation='relu',
+                     kernel_regularizer=regularizers.l2(0.),
+                     activity_regularizer=regularizers.l2(0.)))
+    model.add(MaxPool2D(pool_size=(2, 2)))
+    model.add(BatchNormalization())
+    model.add(Dropout(0.05))
+    model.add(Conv2D(128, kernel_size=3, activation='relu',
+                     kernel_regularizer=regularizers.l2(0.),
+                     activity_regularizer=regularizers.l2(0.)))
+    model.add(MaxPool2D(pool_size=(2, 2)))
+    model.add(BatchNormalization())
+    model.add(Dropout(0.05))
     model.add(Flatten())
     model.add(Dense(256, activation='relu', # 3000
                     kernel_regularizer=regularizers.l2(0.),
                     activity_regularizer=regularizers.l2(0.)))
     model.add(Dropout(0.05))
-    model.add(Dense(3, activation='softmax'))
+    model.add(Dense(2, activation='softmax'))
     return model
     
