@@ -2,6 +2,7 @@ import cv2
 from mtcnn import MTCNN
 from PIL import Image
 import numpy as np
+import argparse
 
 # n -> fps count
 # F -> desired framerate
@@ -9,7 +10,26 @@ import numpy as np
 n = 0
 F = 30
 i = 0
+captureOnlyThisFrame = [1,10,20]
 required_size = (224,224)
+
+# Command Line arguments
+parser = argparse.ArgumentParser(description="Tools for gathering training and testing data for halo")
+parser.add_argument("person", help="Name of the person who is captured")
+parser.add_argument("nickname", help="Nickname of the person, for naming file")
+parser.add_argument("--train", action="store_true", help="Use this to save this image as training data")
+parser.add_argument("--test", action="store_true", help="Use this to save this image as testing data")
+args = parser.parse_args()
+
+if args.train:
+    location = 'dataset/train'
+elif args.test:
+    location = 'dataset/test'
+elif args.train and args.test:
+    print("Please define one of them train or test!")
+else:
+    location = 'dataset/train'
+
 
 detector = MTCNN()
 
@@ -28,7 +48,7 @@ while True:
 
     n += 1
     i += 1
-    if n in range(4):
+    if n in captureOnlyThisFrame:
         # Resize the frame size and convert it to RGB Color
         small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
         rgb_small_frame = frame[:, :, ::-1]
@@ -49,7 +69,7 @@ while True:
                 continue
             face_image = face_image.resize(required_size)
             face_array = np.asarray(face_image)
-            filename = 'dataset/train/Daniel Chrisna Danuega/daniel' + str(i) + '.jpg'
+            filename = location + '/' + args.person + '/' + args.nickname + str(i) + '.jpg'
             try:
                 cv2.imwrite(filename, face_array)
             except AssertionError as err:
