@@ -68,7 +68,7 @@ class FaceRecognition:
         return img_data_generator
 
     def training(self):
-        training_generator = FaceRecognition.data_generator().flow_from_directory(
+        self.training_generator = FaceRecognition.data_generator().flow_from_directory(
             self.TRAINING_DATA_DIRECTORY,
             target_size=(self.IMAGE_WIDTH, self.IMAGE_HEIGHT),
             batch_size=self.BATCH_SIZE,
