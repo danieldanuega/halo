@@ -33,7 +33,7 @@ class FaceRecognition:
         self.TRAINING_DATA_DIRECTORY = "./dataset/train"
         self.TESTING_DATA_DIRECTORY = "./dataset/test"
         self.EPOCHS = 50
-        self.BATCH_SIZE = 32
+        self.BATCH_SIZE = 16
         self.NUMBER_OF_TRAINING_IMAGES = 250
         self.NUMBER_OF_TESTING_IMAGES = 50
         self.IMAGE_HEIGHT = 224
@@ -60,27 +60,29 @@ class FaceRecognition:
     def data_generator():
         img_data_generator = ImageDataGenerator(
             rescale=1./255,
-            # horizontal_flip=True,
             fill_mode="nearest",
-            # zoom_range=0.3,
-            # width_shift_range=0.3,
-            # height_shift_range=0.3,
+            width_shift_range=0.3,
+            height_shift_range=0.3,
             rotation_range=30
         )
         return img_data_generator
 
     def training(self):
-        self.training_generator = FaceRecognition.data_generator().flow_from_directory(
+        training_generator = FaceRecognition.data_generator().flow_from_directory(
             self.TRAINING_DATA_DIRECTORY,
             target_size=(self.IMAGE_WIDTH, self.IMAGE_HEIGHT),
             batch_size=self.BATCH_SIZE,
+            color_mode='rgb',
             class_mode='categorical'
         )
 
         testing_generator = FaceRecognition.data_generator().flow_from_directory(
             self.TESTING_DATA_DIRECTORY,
             target_size=(self.IMAGE_WIDTH, self.IMAGE_HEIGHT),
-            class_mode='categorical'
+            batch_size=self.BATCH_SIZE,
+            class_mode='categorical',
+            color_mode='rgb',
+            shuffle=False
         )
         
         early_stop = EarlyStopping(monitor='val_loss',patience=3)
@@ -93,12 +95,9 @@ class FaceRecognition:
         )
 
         history = self.model.fit(
-            self.training_generator,
-            # steps_per_epoch=self.NUMBER_OF_TRAINING_IMAGES//self.BATCH_SIZE,
+            training_generator,
             epochs=self.EPOCHS,
             validation_data=testing_generator,
-            shuffle=True,
-            # validation_steps=2
             callbacks=[early_stop]
         )
 
