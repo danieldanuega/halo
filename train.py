@@ -101,7 +101,7 @@ class FaceRecognition:
             callbacks=[early_stop]
         )
 
-        FaceRecognition.plot_training(history)
+#         FaceRecognition.plot_training(history)
 
     def save_model(self, model_name):
         model_path = "./model"
