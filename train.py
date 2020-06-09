@@ -95,7 +95,7 @@ class FaceRecognition:
         )
 
         history = self.model.fit(
-            training_generator,
+            self.training_generator,
             epochs=self.EPOCHS,
             validation_data=testing_generator,
             callbacks=[early_stop]
