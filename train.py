@@ -7,12 +7,13 @@ from model import get_model
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras import optimizers
+from tensorflow.keras.callbacks import EarlyStopping
 
 
 import glob
-from mtcnn import MTCNN
+# from mtcnn import MTCNN
 from PIL import Image
-import cv2
+# import cv2
 
 # def get_detected_face(img, required_size=(224, 224)):
 #     detector = MTCNN()
@@ -81,10 +82,13 @@ class FaceRecognition:
             target_size=(self.IMAGE_WIDTH, self.IMAGE_HEIGHT),
             class_mode='categorical'
         )
+        
+        early_stop = EarlyStopping(monitor='val_loss',patience=3)
 
         self.model.compile(
             loss='categorical_crossentropy',
-            optimizer=optimizers.SGD(lr=1e-4, momentum=0.9, decay=1e-2 / self.EPOCHS),
+#             optimizer=optimizers.SGD(lr=1e-4, momentum=0.9, decay=1e-2 / self.EPOCHS),
+            optimizer='adam',
             metrics=["accuracy"]
         )
 
@@ -95,6 +99,7 @@ class FaceRecognition:
             validation_data=testing_generator,
             shuffle=True,
             # validation_steps=2
+            callbacks=[early_stop]
         )
 
         FaceRecognition.plot_training(history)
