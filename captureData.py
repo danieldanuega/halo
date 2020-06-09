@@ -16,6 +16,7 @@ captureOnlyThisFrame = [1,10,20]
 required_size = (224,224)
 
 # Command Line arguments
+# python captureData.py John_Doe john --train
 parser = argparse.ArgumentParser(description="Tools for gathering training and testing data for halo")
 parser.add_argument("person", help="Name of the person who is captured")
 parser.add_argument("nickname", help="Nickname of the person, for naming file")
@@ -25,12 +26,18 @@ args = parser.parse_args()
 
 if args.train:
     location = './dataset/train/{}/'.format(args.person)
+    if not os.path.exists(location):
+        os.mkdir(location)
 elif args.test:
     location = './dataset/test/{}/'.format(args.person)
+    if not os.path.exists(location):
+        os.mkdir(location)
 elif args.train and args.test:
     print("Please define one of them train or test!")
 else:
     location = './dataset/train/{}/'.format(args.person)
+    if not os.path.exists(location):
+        os.mkdir(location)
 
 
 detector = MTCNN()
