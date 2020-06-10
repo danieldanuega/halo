@@ -104,9 +104,8 @@ class FaceRecognition:
 
 #         FaceRecognition.plot_training(history)
 
-    def save_model(self, model_name):
-        model_path = "./model1"
-        lite_model_name = "lite_" + model_name
+    def save_model(self, model_name, lite_model_name):
+        model_path = "./models/model2"
         if not os.path.exists(model_path):
             os.mkdir(model_path)
 
@@ -151,6 +150,7 @@ class FaceRecognition:
 # Call to train the model
 if __name__ == '__main__':
     model_name = "face_recognition.h5"
+    lite_model_name = "face_recognition.tflite"
     faceRecognition = FaceRecognition()
     faceRecognition.training()
-    faceRecognition.save_model(model_name)
+    faceRecognition.save_model(model_name, lite_model_name)
