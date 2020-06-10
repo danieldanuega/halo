@@ -4,6 +4,7 @@ from os import mkdir, listdir
 import numpy as np
 import matplotlib.pyplot as plt
 from model import get_model
+import tensorflow as tf
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras import optimizers
@@ -104,7 +105,8 @@ class FaceRecognition:
 #         FaceRecognition.plot_training(history)
 
     def save_model(self, model_name):
-        model_path = "./model"
+        model_path = "./model1"
+        lite_model_name = "lite_" + model_name
         if not os.path.exists(model_path):
             os.mkdir(model_path)
 
@@ -116,6 +118,10 @@ class FaceRecognition:
         class_names_reversed = np.load(os.path.join(model_path, class_names_file_reverse), allow_pickle=True).item()
         class_names = dict([(value, key) for key, value in class_names_reversed.items()])
         np.save(os.path.join(model_path, class_names_file), class_names)
+        # Save to tensorflow lite format .tflite
+        converter = tf.lite.TFLiteConverter.from_keras_model_file(os.path.join(model_path, model_name))
+        tflite_model = converter.convert()
+        open(os.path.join(model_path, lite_model_name), 'wb').write(tflite_model)
 
     @staticmethod
     def load_saved_model(model_path):
