@@ -1,4 +1,5 @@
 import os
+import re
 from os.path import join, exists
 from os import mkdir, listdir
 import numpy as np
@@ -128,15 +129,28 @@ class FaceRecognition:
         return model
 
     @staticmethod
-    def model_prediction(image, face_array, face, model_path, class_names_path):
+    def model_prediction(face_array, model_path, class_names_path):
         class_name = "None Class Name"
-        # face_array, face = get_detected_face(image)
         model = load_model(model_path)
         face_array = face_array.astype('float32')
         input_sample = np.expand_dims(face_array, axis=0)
-        result = model.predict(input_sample)
-        result = np.argmax(result, axis=1)
-        index = result[0]
+        # Check if use tensorflow or tensorflow lite
+        if re.search('.h5', model_path):    
+            results = model.predict(input_sample)
+            results = np.argmax(results, axis=1)
+            index = results[0]
+        elif re.search('.tflite', model_path):
+            interpreter = tf.lite.Interpreter(model_path=model_path)
+            interpreter.allocate_tensors()
+            input_details = interpreter.get_input_details()
+            output_details = interpreter.get_output_details()
+            interpreter.set_tensor(input_details[0]['index'], input_sample)
+            interpreter.invoke()
+            output_data = interpreter.get_tensor(output_details[0]['index'])
+            results = np.squeeze(output_data)
+            index = results.argsort()[-5:][::-1]
+        else:
+            return class_name
 
         classes = np.load(class_names_path, allow_pickle=True).item()
         # print(classes, type(classes), classes.items())

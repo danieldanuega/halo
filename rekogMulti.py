@@ -4,6 +4,7 @@ from mtcnn import MTCNN
 from PIL import Image
 import numpy as np
 from train import FaceRecognition as FR
+import tensorflow as tf
 
 # n -> fps count
 # F -> desired framerate
@@ -14,6 +15,7 @@ i = 0
 required_size = (224,224)
 predFrame = [10,20,30]
 model_name = "face_recognition.h5" 
+lite_model_name = "lite_face_recognition.tflite"
 class_name = "face_recognition_class_names.npy"
 
 def gstreamer_pipeline(
@@ -84,9 +86,13 @@ while True:
                 continue
             face_image = face_image.resize(required_size)
             face_array = np.asarray(face_image)
+            face_array = face_array/255
             
             # Predict the frame
-            pred = FR.model_prediction(frame, face_array, face_frame, os.path.join("model", model_name), os.path.join("model", class_name))
+            # For default model
+            # pred = FR.model_prediction(face_array, os.path.join("models/model1", model_name), os.path.join("models/model1", class_name))
+            # For tflite model
+            pred = FR.model_prediction(face_array, os.path.join("models/model1", lite_model_name), os.path.join("models/model1", class_name))
 
             # Draw rectangle in face
             cv2.rectangle(frame,
