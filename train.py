@@ -131,11 +131,11 @@ class FaceRecognition:
     @staticmethod
     def model_prediction(face_array, model_path, class_names_path):
         class_name = "None Class Name"
-        model = load_model(model_path)
         face_array = face_array.astype('float32')
         input_sample = np.expand_dims(face_array, axis=0)
         # Check if use tensorflow or tensorflow lite
-        if re.search('.h5', model_path):    
+        if re.search('.h5', model_path):
+            model = load_model(model_path)
             results = model.predict(input_sample)
             results = np.argmax(results, axis=1)
             index = results[0]
@@ -148,7 +148,8 @@ class FaceRecognition:
             interpreter.invoke()
             output_data = interpreter.get_tensor(output_details[0]['index'])
             results = np.squeeze(output_data)
-            index = results.argsort()[-5:][::-1]
+            results = results.argsort()[-5:][::-1]
+            index = results[0]
         else:
             return class_name
 
