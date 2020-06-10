@@ -90,9 +90,9 @@ while True:
             
             # Predict the frame
             # For default model
-            # pred = FR.model_prediction(face_array, os.path.join("models/model1", model_name), os.path.join("models/model1", class_name))
+            # pred = FR.model_prediction(face_array, os.path.join("models/model1", model_name), os.path.join("models/model1", class_name), 0.8)
             # For tflite model
-            pred = FR.model_prediction(face_array, os.path.join("models/model1", lite_model_name), os.path.join("models/model1", class_name))
+            pred = FR.model_prediction(face_array, os.path.join("models/model1", lite_model_name), os.path.join("models/model1", class_name), 0.8)
 
             # Draw rectangle in face
             cv2.rectangle(frame,

@@ -77,6 +77,8 @@ class FaceRecognition:
             color_mode='rgb',
             class_mode='categorical'
         )
+        
+        print(self.training_generator.class_indices)
 
         testing_generator = FaceRecognition.data_generator().flow_from_directory(
             self.TESTING_DATA_DIRECTORY,
@@ -129,8 +131,8 @@ class FaceRecognition:
         return model
 
     @staticmethod
-    def model_prediction(face_array, model_path, class_names_path):
-        class_name = "None Class Name"
+    def model_prediction(face_array, model_path, class_names_path, threshold):
+        class_name = "I don't know yet"
         face_array = face_array.astype('float32')
         input_sample = np.expand_dims(face_array, axis=0)
         # Check if use tensorflow or tensorflow lite
@@ -147,9 +149,16 @@ class FaceRecognition:
             interpreter.set_tensor(input_details[0]['index'], input_sample)
             interpreter.invoke()
             output_data = interpreter.get_tensor(output_details[0]['index'])
+            # Squeeze 2D array into 1D array
             results = np.squeeze(output_data)
-            results = results.argsort()[-5:][::-1]
-            index = results[0]
+            # Sort the probabilities array from max to min
+            indices = results.argsort()[-5:][::-1]
+            # Get the index of max probabilities
+            index = indices[0]
+            print('probabilites: {}'.format(results))
+            print(results[index])
+            if results[index] < threshold:
+                return class_name
         else:
             return class_name
 
