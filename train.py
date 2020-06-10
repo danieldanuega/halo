@@ -164,7 +164,7 @@ class FaceRecognition:
 # Call to train the model
 if __name__ == '__main__':
     model_name = "face_recognition.h5"
-    lite_model_name = "face_recognition.tflite"
+    lite_model_name = "lite_face_recognition.tflite"
     faceRecognition = FaceRecognition()
     faceRecognition.training()
     faceRecognition.save_model(model_name, lite_model_name)
