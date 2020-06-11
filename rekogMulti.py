@@ -93,7 +93,7 @@ while True:
             # For default model
             # pred = FR.model_prediction(face_array, os.path.join(model_path, model_name), os.path.join(model_path, class_name), 0.8)
             # For tflite model
-            pred = FR.model_prediction(face_array, os.path.join(model_path, lite_model_name), os.path.join(model_path, class_name), 0.8)
+            pred = FR.model_prediction(face_array, os.path.join(model_path, lite_model_name), os.path.join(model_path, class_name), 0.75)
 
             # Draw rectangle in face
             cv2.rectangle(frame,
