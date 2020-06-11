@@ -163,7 +163,7 @@ class FaceRecognition:
             return class_name
 
         classes = np.load(class_names_path, allow_pickle=True).item()
-        print(classes, type(classes), classes.items())
+        print(classes)
         if type(classes) is dict:
             for k, v in classes.items():
                 if k == index:
