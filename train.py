@@ -9,7 +9,7 @@ import tensorflow as tf
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras import optimizers
-from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
 
 import glob
@@ -41,6 +41,7 @@ class FaceRecognition:
         self.IMAGE_HEIGHT = 224
         self.IMAGE_WIDTH = 224
         self.model = get_model()
+        self.MODEL_PATH = "./models/model4-best"
         self.training_generator = None
 
     @staticmethod
@@ -90,6 +91,7 @@ class FaceRecognition:
         )
         
         early_stop = EarlyStopping(monitor='val_loss',patience=3)
+        checkpoint = ModelCheckpoint(os.path.join(self.MODEL_PATH, 'best_face_recognition.h5'), monitor='val_loss', verbose=1, save_best_only=True)
 
         self.model.compile(
             loss='categorical_crossentropy',
@@ -102,16 +104,17 @@ class FaceRecognition:
             self.training_generator,
             epochs=self.EPOCHS,
             validation_data=testing_generator,
-            callbacks=[early_stop]
+            callbacks=[early_stop, checkpoint]
         )
 
 #         FaceRecognition.plot_training(history)
 
     def save_model(self, model_name, lite_model_name):
-        model_path = "./models/model4"
+        model_path = self.MODEL_PATH
         if not os.path.exists(model_path):
             os.mkdir(model_path)
-
+        
+        # Save the latest model in last epochs
         self.model.save(os.path.join(model_path, model_name))
         class_names = self.training_generator.class_indices
         class_names_file_reverse = model_name[:-3] + "_class_names_reverse.npy"
@@ -120,10 +123,13 @@ class FaceRecognition:
         class_names_reversed = np.load(os.path.join(model_path, class_names_file_reverse), allow_pickle=True).item()
         class_names = dict([(value, key) for key, value in class_names_reversed.items()])
         np.save(os.path.join(model_path, class_names_file), class_names)
-        # Save to tensorflow lite format .tflite
-        converter = tf.lite.TFLiteConverter.from_keras_model_file(os.path.join(model_path, model_name))
-        tflite_model = converter.convert()
+        # Save to tensorflow lite format .tflite for both latest and best model
+        converter1 = tf.lite.TFLiteConverter.from_keras_model_file(os.path.join(model_path, model_name))
+        converter2 = tf.lite.TFLiteConverter.from_keras_model_file(os.path.join(model_path, 'best_face_recognition.h5'))
+        tflite_model = converter1.convert()
+        best_tflite_model = converter2.convert()
         open(os.path.join(model_path, lite_model_name), 'wb').write(tflite_model)
+        open(os.path.join(model_path, 'best_lite_face_recognition.tflite'), 'wb').write(best_tflite_model)
 
     @staticmethod
     def load_saved_model(model_path):
