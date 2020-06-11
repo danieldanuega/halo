@@ -108,7 +108,7 @@ class FaceRecognition:
 #         FaceRecognition.plot_training(history)
 
     def save_model(self, model_name, lite_model_name):
-        model_path = "./models/model2"
+        model_path = "./models/model4"
         if not os.path.exists(model_path):
             os.mkdir(model_path)
 
@@ -151,7 +151,7 @@ class FaceRecognition:
             output_data = interpreter.get_tensor(output_details[0]['index'])
             # Squeeze 2D array into 1D array
             results = np.squeeze(output_data)
-            # Sort the probabilities array from max to min
+            # Sort the probabilities array from max to min, but here we use the index as the representation
             indices = results.argsort()[-5:][::-1]
             # Get the index of max probabilities
             index = indices[0]
@@ -163,7 +163,7 @@ class FaceRecognition:
             return class_name
 
         classes = np.load(class_names_path, allow_pickle=True).item()
-        # print(classes, type(classes), classes.items())
+        print(classes, type(classes), classes.items())
         if type(classes) is dict:
             for k, v in classes.items():
                 if k == index:
