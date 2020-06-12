@@ -1,5 +1,7 @@
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, MaxPool2D, Dense, Dropout, Flatten
+from tensorflow.keras.layers import Conv2D, MaxPool2D, Dense, Dropout, Flatten, Lambda
+from tensorflow.keras.regularizers import l2
+import tensorflow as tf
 
 def get_model():
     model = Sequential()
@@ -17,9 +19,11 @@ def get_model():
 
     model.add(Flatten())
 
-    model.add(Dense(256, activation='relu'))
-    model.add(Dense(256, activation='relu')) 
-    model.add(Dense(2, activation='softmax'))
+    model.add(Dense(256, activation=None))
+    model.add(Lambda(lambda x: tf.math.l2_normalize(x, axis=1)))
+    
+    # SVM
+    model.add(Dense(2, activation='linear', kernel_regularizer=l2(0.0001)))
     
     return model
 

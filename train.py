@@ -41,7 +41,7 @@ class FaceRecognition:
         self.IMAGE_HEIGHT = 224
         self.IMAGE_WIDTH = 224
         self.model = get_model()
-        self.MODEL_PATH = "./models/model5"
+        self.MODEL_PATH = "./models/modelsvm1"
         self.training_generator = None
 
     @staticmethod
@@ -91,12 +91,12 @@ class FaceRecognition:
         )
         
         early_stop = EarlyStopping(monitor='val_loss',patience=3)
-        checkpoint = ModelCheckpoint(os.path.join(self.MODEL_PATH, 'best_face_recognition.h5'), monitor='val_loss', verbose=1, save_best_only=True)
+        checkpoint = ModelCheckpoint(os.path.join(self.MODEL_PATH, 'best_face_recognition.h5'), monitor='val_loss', verbose=1, save_best_only=True)        
 
         self.model.compile(
-            loss='categorical_crossentropy',
+            loss='squared_hinge',
 #             optimizer=optimizers.SGD(lr=1e-4, momentum=0.9, decay=1e-2 / self.EPOCHS),
-            optimizer='adam',
+            optimizer='adadelta',
             metrics=["accuracy"]
         )
 
