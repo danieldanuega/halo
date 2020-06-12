@@ -41,7 +41,7 @@ class FaceRecognition:
         self.IMAGE_HEIGHT = 224
         self.IMAGE_WIDTH = 224
         self.model = get_model()
-        self.MODEL_PATH = "./models/model4-best"
+        self.MODEL_PATH = "./models/model5"
         self.training_generator = None
 
     @staticmethod
