@@ -11,6 +11,7 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras import optimizers
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 import tensorflow_addons as tfa
+from sklearn.neighbors import KNeighborsClassifier
 
 
 import glob
@@ -177,6 +178,20 @@ class FaceEmbedding:
                     class_name = v
 
         return class_name
+    
+
+class FaceRecognition:
+    def __init__(self):
+        self.MODEL_PATH = "./models/embedModel1"
+        
+    def load_images(self):
+        
+        
+    def train(self):
+        embed = FaceEmbedding.load_saved_model(self.MODEL_PATH)
+        
+        model = KNeighborsClassifier(n_neighbors=2)
+        model.fit()
     
     
 # Call to train the model
