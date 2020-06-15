@@ -36,7 +36,7 @@ class FaceEmbedding:
         self.TRAINING_DATA_DIRECTORY = "./dataset/train"
         self.TESTING_DATA_DIRECTORY = "./dataset/test"
         self.EPOCHS = 50
-        self.BATCH_SIZE = 16
+        self.BATCH_SIZE = 32
         self.NUMBER_OF_TRAINING_IMAGES = 250
         self.NUMBER_OF_TESTING_IMAGES = 50
         self.IMAGE_HEIGHT = 224
@@ -77,7 +77,7 @@ class FaceEmbedding:
             target_size=(self.IMAGE_WIDTH, self.IMAGE_HEIGHT),
             batch_size=self.BATCH_SIZE,
             color_mode='rgb',
-            # class_mode='categorical'
+            class_mode='sparse'
         )
         
         # print(self.training_generator.class_indices)
@@ -103,6 +103,7 @@ class FaceEmbedding:
         history = self.model.fit(
             self.training_generator,
             epochs=self.EPOCHS,
+            steps_per_epoch=16,
             # validation_data=testing_generator,
             callbacks=[early_stop, checkpoint]
         )
@@ -122,12 +123,14 @@ class FaceEmbedding:
         class_names = dict([(value, key) for key, value in class_names_reversed.items()])
         np.save(os.path.join(model_path, class_names_file), class_names)
         # Save to tensorflow lite format .tflite for both latest and best model
-        converter1 = tf.lite.TFLiteConverter.from_keras_model_file(os.path.join(model_path, model_name))
-        converter2 = tf.lite.TFLiteConverter.from_keras_model_file(os.path.join(model_path, 'best_face_embedding.h5'))
-        tflite_model = converter1.convert()
-        best_tflite_model = converter2.convert()
-        open(os.path.join(model_path, lite_model_name), 'wb').write(tflite_model)
-        open(os.path.join(model_path, 'best_lite_face_embedding.tflite'), 'wb').write(best_tflite_model)
+        # converter1 = tf.lite.TFLiteConverter.from_keras_model(os.path.join(model_path, model_name))
+        # converter2 = tf.lite.TFLiteConverter.from_keras_model(os.path.join(model_path, 'best_face_embedding.h5'))
+        # converter1.experimental_new_converter = True
+        # converter2.experimental_new_converter = True
+        # tflite_model = converter1.convert()
+        # best_tflite_model = converter2.convert()
+        # open(os.path.join(model_path, lite_model_name), 'wb').write(tflite_model)
+        # open(os.path.join(model_path, 'best_lite_face_embedding.tflite'), 'wb').write(best_tflite_model)
 
     @staticmethod
     def load_saved_model(model_path):
