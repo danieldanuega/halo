@@ -11,6 +11,8 @@ def get_model():
     model.add(Conv2D(filters=256, kernel_size=(5,5), activation='relu'))
     model.add(MaxPool2D(pool_size=(3,3)))
 
+    model.add(Dropout(0.3))
+
     model.add(Conv2D(filters=256, kernel_size=(3,3), activation='relu'))
     model.add(Conv2D(filters=256, kernel_size=(3,3), activation='relu'))
     model.add(Conv2D(filters=256, kernel_size=(3,3), activation='relu'))
@@ -21,9 +23,5 @@ def get_model():
 
     model.add(Dense(256, activation=None))
     model.add(Lambda(lambda x: tf.math.l2_normalize(x, axis=1)))
-    
-    # SVM
-    model.add(Dense(2, activation='linear', kernel_regularizer=l2(0.0001)))
-    
     return model
 

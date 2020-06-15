@@ -30,3 +30,4 @@ tensorflow-gpu==1.13.1+nv19.3
 termcolor==1.1.0
 Werkzeug==1.0.1
 zipp==3.1.0
+tensorflow_addons==0.10.0

@@ -10,6 +10,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras import optimizers
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+import tensorflow_addons as tfa
 
 
 import glob
@@ -29,7 +30,7 @@ from PIL import Image
 #     return face_array, face
 
 
-class FaceRecognition:
+class FaceEmbedding:
 
     def __init__(self):
         self.TRAINING_DATA_DIRECTORY = "./dataset/train"
@@ -41,7 +42,7 @@ class FaceRecognition:
         self.IMAGE_HEIGHT = 224
         self.IMAGE_WIDTH = 224
         self.model = get_model()
-        self.MODEL_PATH = "./models/modelsvm1"
+        self.MODEL_PATH = "./models/embedModel1"
         self.training_generator = None
 
     @staticmethod
@@ -71,17 +72,17 @@ class FaceRecognition:
         return img_data_generator
 
     def training(self):
-        self.training_generator = FaceRecognition.data_generator().flow_from_directory(
+        self.training_generator = FaceEmbedding.data_generator().flow_from_directory(
             self.TRAINING_DATA_DIRECTORY,
             target_size=(self.IMAGE_WIDTH, self.IMAGE_HEIGHT),
             batch_size=self.BATCH_SIZE,
             color_mode='rgb',
-            class_mode='categorical'
+            # class_mode='categorical'
         )
         
-        print(self.training_generator.class_indices)
+        # print(self.training_generator.class_indices)
 
-        testing_generator = FaceRecognition.data_generator().flow_from_directory(
+        testing_generator = FaceEmbedding.data_generator().flow_from_directory(
             self.TESTING_DATA_DIRECTORY,
             target_size=(self.IMAGE_WIDTH, self.IMAGE_HEIGHT),
             batch_size=self.BATCH_SIZE,
@@ -90,24 +91,21 @@ class FaceRecognition:
             shuffle=False
         )
         
-        early_stop = EarlyStopping(monitor='val_loss',patience=3)
-        checkpoint = ModelCheckpoint(os.path.join(self.MODEL_PATH, 'best_face_recognition.h5'), monitor='val_loss', verbose=1, save_best_only=True)        
+        early_stop = EarlyStopping(monitor='loss',patience=3)
+        checkpoint = ModelCheckpoint(os.path.join(self.MODEL_PATH, 'best_face_embedding.h5'), monitor='loss', verbose=1, save_best_only=True)        
 
         self.model.compile(
-            loss='squared_hinge',
+            loss=tfa.losses.TripletSemiHardLoss(),
 #             optimizer=optimizers.SGD(lr=1e-4, momentum=0.9, decay=1e-2 / self.EPOCHS),
-            optimizer='adadelta',
-            metrics=["accuracy"]
+            optimizer=optimizers.Adam()
         )
 
         history = self.model.fit(
             self.training_generator,
             epochs=self.EPOCHS,
-            validation_data=testing_generator,
+            # validation_data=testing_generator,
             callbacks=[early_stop, checkpoint]
         )
-
-#         FaceRecognition.plot_training(history)
 
     def save_model(self, model_name, lite_model_name):
         model_path = self.MODEL_PATH
@@ -125,11 +123,11 @@ class FaceRecognition:
         np.save(os.path.join(model_path, class_names_file), class_names)
         # Save to tensorflow lite format .tflite for both latest and best model
         converter1 = tf.lite.TFLiteConverter.from_keras_model_file(os.path.join(model_path, model_name))
-        converter2 = tf.lite.TFLiteConverter.from_keras_model_file(os.path.join(model_path, 'best_face_recognition.h5'))
+        converter2 = tf.lite.TFLiteConverter.from_keras_model_file(os.path.join(model_path, 'best_face_embedding.h5'))
         tflite_model = converter1.convert()
         best_tflite_model = converter2.convert()
         open(os.path.join(model_path, lite_model_name), 'wb').write(tflite_model)
-        open(os.path.join(model_path, 'best_lite_face_recognition.tflite'), 'wb').write(best_tflite_model)
+        open(os.path.join(model_path, 'best_lite_face_embedding.tflite'), 'wb').write(best_tflite_model)
 
     @staticmethod
     def load_saved_model(model_path):
@@ -177,10 +175,11 @@ class FaceRecognition:
 
         return class_name
     
+    
 # Call to train the model
 if __name__ == '__main__':
-    model_name = "face_recognition.h5"
-    lite_model_name = "lite_face_recognition.tflite"
-    faceRecognition = FaceRecognition()
-    faceRecognition.training()
-    faceRecognition.save_model(model_name, lite_model_name)
+    model_name = "face_embedding.h5"
+    lite_model_name = "lite_face_embedding.tflite"
+    faceEmbedding = FaceEmbedding()
+    faceEmbedding.training()
+    faceEmbedding.save_model(model_name, lite_model_name)
