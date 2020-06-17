@@ -3,7 +3,6 @@ temp
 env
 .DS_STORE
 best_model.h5
-best_model_weights.h5
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
