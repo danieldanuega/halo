@@ -1,6 +1,7 @@
 from tensorflow.keras import models
-from tensorflow.keras.layers import Conv2D, MaxPool2D, Flatten, Dense, BatchNormalization, Dropout
+from tensorflow.keras.layers import Conv2D, MaxPool2D, Flatten, Dense, BatchNormalization, Dropout, Lambda
 from tensorflow.keras import regularizers
+import tensorflow as tf
 
 def get_model():
     model = models.Sequential()
@@ -28,10 +29,8 @@ def get_model():
     
     model.add(Flatten())
     
-    model.add(Dense(256, activation='relu', # 3000
-                    kernel_regularizer=regularizers.l2(0.),
-                    activity_regularizer=regularizers.l2(0.)))
-    model.add(Dropout(0.05))
-    model.add(Dense(2, activation='softmax'))
+    model.add(Dense(256, activation=None))
+#     model.add(Dropout(0.05))
+    model.add(Lambda(lambda x: tf.math.l2_normalize(x, axis=1)))
     return model
     
