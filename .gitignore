@@ -2,6 +2,7 @@ models
 temp
 env
 .DS_STORE
+best_model.h5
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
