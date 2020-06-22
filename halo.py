@@ -2,7 +2,9 @@ from model import load_FbDeepFace
 import os
 import pickle
 from tqdm import tqdm
-import functions
+import helper
+import pandas as pd
+import numpy as np
 
 class FaceRecognition:
     def __init__(self, database='./database'):
@@ -18,7 +20,10 @@ class FaceRecognition:
             
             if os.path.exists(os.path.join(self.database, file_name)):
                 f = open(os.path.join(self.database, file_name), 'rb')
-                representations = pickle.load(f)
+                try:
+                    representations = pickle.load(f)
+                except EOFError:
+                    print("representations.pkl seems empty")
                 
                 # If representations exist but there are new employees or resign employees
                 if len(representations) != len(os.listdir(self.database))-1:
@@ -26,7 +31,8 @@ class FaceRecognition:
                     print('Begin analyzing')
                     isTrainAgain = True
                 else:
-                    print('There are {} faces found in the database'.format(len(representations)))
+                    self.representations = representations
+                    print('There are {} faces found in the database'.format(len(self.representations)))
             
             # Find the employees face representation as vector
             if isTrainAgain or os.path.exists(os.path.join(self.database, file_name)) == False:
@@ -59,7 +65,7 @@ class FaceRecognition:
                     input_shape = shape[0][1:3] if type(shape) is list else shape[1:3]
                     input_shape_x = input_shape[0]; input_shape_y = input_shape[1]
                     
-                    img = functions.detectFace(employee, (input_shape_y, input_shape_x), enforce_detection = True)
+                    img = helper.detectFace(employee, (input_shape_y, input_shape_x), enforce_detection = True)
                     representation = self.model.predict(img)[0,:]
                     
                     instance = []
@@ -74,13 +80,36 @@ class FaceRecognition:
                 pickle.dump(representations, f)
                 f.close()
                 
+                self.representations = representations
+                
                 print("Representations stored in ",self.database,"/",file_name)
         else:
             raise ValueError("database not a directory")
         
     def predict(self, img):
-        return 0
+        df = pd.DataFrame(self.representations, columns=['identity', 'representation'])
         
-    def __compute_distance(self):
-        return 0
+        target_representation = self.model.predict(img)[0,:]
+        
+        distances = []
+        for index, col in df.iterrows():
+            source_representation = col['representaion']
+            distance = self.__compute_distance(source_representation, target_representation)
+            distances.append(distance)
+        
+        threshold = helper.findThreshold('DeepFace', 'cosine')
+        
+        df['distances'] = distances
+        df = df.drop(columns=['representations'])
+        df = df[df.distance <= threshold]
+        
+        df = df.sort_values(by=['distance'], ascending=True).reset_index(drop=True)
+        
+        return df
+    
+    def __compute_distance(self, origin, test):
+        a = np.matmul(np.transpose(origin), test)
+        b = np.sum(np.multiply(origin, origin))
+        c = np.sum(np.multiply(test, test))
+        return 1 - (a / (np.sqrt(b) * np.sqrt(c)))
     
