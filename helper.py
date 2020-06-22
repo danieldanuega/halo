@@ -16,6 +16,7 @@ import multiprocessing
 import subprocess
 import tensorflow as tf
 import keras
+import asyncio
 
 def loadBase64Img(uri):
    encoded_data = uri.split(',')[1]
@@ -155,7 +156,25 @@ def get_opencv_path():
 	
 	return path+"/data/"
 
-def detectFace(img, target_size=(224, 224), grayscale = False, enforce_detection = True):
+def load_opencv_detector():
+    opencv_path = get_opencv_path()
+    face_detector_path = opencv_path+"haarcascade_frontalface_default.xml"
+    eye_detector_path = opencv_path+"haarcascade_eye.xml"
+    
+    if os.path.isfile(face_detector_path) != True:
+        raise ValueError("Confirm that opencv is installed on your environment! Expected path ",face_detector_path," violated.")
+    
+    face_detector = cv2.CascadeClassifier(face_detector_path)
+    eye_detector = cv2.CascadeClassifier(eye_detector_path)
+    
+    return (face_detector, eye_detector)
+
+def detectFacesLive(img):
+    face_detector, eye_detector = load_opencv_detector()
+    faces = face_detector.detectMultiScale(img, 1.3, 5)
+    return faces
+
+def detectFace(img, target_size=(224, 224), grayscale = False, enforce_detection = True, stream = False):
 	
 	img_path = ""
 	
@@ -166,22 +185,15 @@ def detectFace(img, target_size=(224, 224), grayscale = False, enforce_detection
 		exact_image = True
 	
 	base64_img = False
-	if len(img) > 11 and img[0:11] == "data:image/":
-		base64_img = True
+	if stream == False:
+		if len(img) > 11 and img[0:11] == "data:image/":
+			base64_img = True
 
 	#-----------------------
 	
-	opencv_path = get_opencv_path()
-	face_detector_path = opencv_path+"haarcascade_frontalface_default.xml"
-	eye_detector_path = opencv_path+"haarcascade_eye.xml"
-	
-	if os.path.isfile(face_detector_path) != True:
-		raise ValueError("Confirm that opencv is installed on your environment! Expected path ",face_detector_path," violated.")
-	
-	#--------------------------------
-	
-	face_detector = cv2.CascadeClassifier(face_detector_path)
-	eye_detector = cv2.CascadeClassifier(eye_detector_path)
+	face_detector, eye_detector = load_opencv_detector()
+ 
+	#-----------------------
 	
 	if base64_img == True:
 		img = loadBase64Img(img)

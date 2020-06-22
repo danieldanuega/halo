@@ -155,6 +155,24 @@ def get_opencv_path():
 	
 	return path+"/data/"
 
+def load_opencv_detector():
+    opencv_path = get_opencv_path()
+    face_detector_path = opencv_path+"haarcascade_frontalface_default.xml"
+    eye_detector_path = opencv_path+"haarcascade_eye.xml"
+    
+    if os.path.isfile(face_detector_path) != True:
+        raise ValueError("Confirm that opencv is installed on your environment! Expected path ",face_detector_path," violated.")
+    
+    face_detector = cv2.CascadeClassifier(face_detector_path)
+    eye_detector = cv2.CascadeClassifier(eye_detector_path)
+    
+    return (face_detector, eye_detector)
+
+def detectFaceLive(img, target_size):
+    face_detector, eye_detector = load_opencv_detector()
+    faces = face_detector.detectMultiScale(img, 1.3, 5)
+    return faces
+
 def detectFace(img, target_size=(224, 224), grayscale = False, enforce_detection = True):
 	
 	img_path = ""
@@ -171,17 +189,9 @@ def detectFace(img, target_size=(224, 224), grayscale = False, enforce_detection
 
 	#-----------------------
 	
-	opencv_path = get_opencv_path()
-	face_detector_path = opencv_path+"haarcascade_frontalface_default.xml"
-	eye_detector_path = opencv_path+"haarcascade_eye.xml"
-	
-	if os.path.isfile(face_detector_path) != True:
-		raise ValueError("Confirm that opencv is installed on your environment! Expected path ",face_detector_path," violated.")
-	
-	#--------------------------------
-	
-	face_detector = cv2.CascadeClassifier(face_detector_path)
-	eye_detector = cv2.CascadeClassifier(eye_detector_path)
+	face_detector, eye_detector = load_opencv_detector()
+ 
+	#-----------------------
 	
 	if base64_img == True:
 		img = loadBase64Img(img)
@@ -296,7 +306,7 @@ def detectFace(img, target_size=(224, 224), grayscale = False, enforce_detection
 		detected_face = cv2.resize(detected_face, target_size)
 		
 		img_pixels = image.img_to_array(detected_face)
-		img_pixels = np.expand_dims(img_pixels, axis = 0)
+		img_pixels = np.expand_didetected_facems(img_pixels, axis = 0)
 		
 		#normalize input in [0, 1]
 		img_pixels /= 255

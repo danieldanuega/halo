@@ -87,25 +87,34 @@ class FaceRecognition:
             raise ValueError("database not a directory")
         
     def predict(self, img):
+        if self.representations == None or len(self.representations) == 0:
+            raise AttributeError("Representations file not loaded correctly")
+        
         df = pd.DataFrame(self.representations, columns=['identity', 'representation'])
         
         target_representation = self.model.predict(img)[0,:]
         
         distances = []
         for index, col in df.iterrows():
-            source_representation = col['representaion']
+            source_representation = col['representation']
             distance = self.__compute_distance(source_representation, target_representation)
             distances.append(distance)
         
         threshold = helper.findThreshold('DeepFace', 'cosine')
         
         df['distances'] = distances
-        df = df.drop(columns=['representations'])
-        df = df[df.distance <= threshold]
+        df = df.drop(columns=['representation'])
+        df = df[df.distances <= threshold]
+
+        df = df.sort_values(by=['distances'], ascending=True).reset_index(drop=True)
+        print(df)
         
-        df = df.sort_values(by=['distance'], ascending=True).reset_index(drop=True)
+        if df.empty:
+            return "Employee doesn't exist"
         
-        return df
+        person = df.iloc[0]['identity']
+        name, sep, image_name = person[11::].partition('/')
+        return name
     
     def __compute_distance(self, origin, test):
         a = np.matmul(np.transpose(origin), test)

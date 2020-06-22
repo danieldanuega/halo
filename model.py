@@ -5,6 +5,9 @@ from pathlib import Path
 import zipfile
 import gdown
 
+def get_input_shape():
+    return (152,152)
+
 def load_FbDeepFace():
     model = Sequential()
     
