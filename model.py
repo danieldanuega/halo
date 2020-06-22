@@ -1,5 +1,5 @@
-import tensorflow.keras.models import Sequential, Model
-import tensorflow.keras.layers import Dense, Conv2D, MaxPool2D, Flatten, Dropout, LocallyConnected2D
+from tensorflow.keras.models import Sequential, Model
+from tensorflow.keras.layers import Dense, Conv2D, MaxPool2D, Flatten, Dropout, LocallyConnected2D
 import os
 from pathlib import Path
 import zipfile
@@ -8,7 +8,7 @@ import gdown
 def load_FbDeepFace():
     model = Sequential()
     
-    model.add(Conv2D(filters=32, kernel_size=(11,11), activation='relu', name='C1', input_shape=(153,153,3)))
+    model.add(Conv2D(filters=32, kernel_size=(11,11), activation='relu', name='C1', input_shape=(152,152,3)))
     model.add(MaxPool2D(pool_size=(3,3), strides=2, padding='same', name='M2'))
     model.add(Conv2D(filters=16, kernel_size=(9,9), activation='relu', name='C3'))
     
