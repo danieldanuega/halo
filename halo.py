@@ -11,7 +11,7 @@ class FaceRecognition:
         self.model = load_FbDeepFace()
         self.database = database
         
-        # Check if the representations of employees face is exist or not
+        # Check if the representations of employee faces is exist or not
         if os.path.isdir(self.database) == True:
             file_name = 'representations.pkl'
             file_name = file_name.replace("-", "_").lower()
@@ -24,25 +24,23 @@ class FaceRecognition:
                     representations = pickle.load(f)
                 except EOFError:
                     print("representations.pkl seems empty")
+                    
+                _, counts = self.__count_files(self.database)
                 
-                # If representations exist but there are new employees or resign employees
-                if len(representations) != len(os.listdir(self.database))-1:
+                # If representations.pkl exist but there are new employees or resign employees
+                if len(representations) != counts:
+                    print('In database: {}'.format(counts))
+                    print('In representations.pkl: {}'.format(len(representations)))
                     print('Found new employees or one of them have resign')
                     print('Begin analyzing')
                     isTrainAgain = True
                 else:
                     self.representations = representations
-                    print('There are {} faces found in the database'.format(len(self.representations)))
+                    print('There are {} of {} faces found in the database'.format(len(self.representations), counts))
             
             # Find the employees face representation as vector
             if isTrainAgain or os.path.exists(os.path.join(self.database, file_name)) == False:
-                employees = []
-            
-                for root, directory, files in os.walk(self.database):
-                    for f in files:
-                        if ('.jpg' in f):
-                            exact_path = root + "/" + f
-                            employees.append(exact_path)
+                employees, _ = self.__count_files(self.database)
                 
                 if len(employees) == 0:
                     raise ValueError("There is no image in ", self.database," folder!")
@@ -97,10 +95,10 @@ class FaceRecognition:
         distances = []
         for index, col in df.iterrows():
             source_representation = col['representation']
-            distance = self.__compute_distance(source_representation, target_representation)
+            distance = self.__euclideanDistance(self.__l2_normalize(source_representation), self.__l2_normalize(target_representation))
             distances.append(distance)
         
-        threshold = helper.findThreshold('DeepFace', 'cosine')
+        threshold = helper.findThreshold('DeepFace', 'euclidean_l2')
         
         df['distances'] = distances
         df = df.drop(columns=['representation'])
@@ -114,11 +112,32 @@ class FaceRecognition:
         
         person = df.iloc[0]['identity']
         name, sep, image_name = person[11::].partition('/')
-        return name
+        return name.capitalize()
     
-    def __compute_distance(self, origin, test):
+    def __cosineDistance(self, origin, test):
         a = np.matmul(np.transpose(origin), test)
         b = np.sum(np.multiply(origin, origin))
         c = np.sum(np.multiply(test, test))
         return 1 - (a / (np.sqrt(b) * np.sqrt(c)))
+    
+    def __count_files(self, dir_path):
+        count = 0
+        items = []
+        for root, directory, files in os.walk(dir_path):
+            for f in files:
+                if '.jpg' in f:
+                    count+=1
+                    exact_path = root + '/' + f
+                    items.append(exact_path)
+        
+        return (items, count)
+    
+    def __l2_normalize(self, x):
+        return x / np.sqrt(np.sum(np.multiply(x, x)))
+ 
+    def __euclideanDistance(self, source_representation, test_representation):
+        euclidean_distance = source_representation - test_representation
+        euclidean_distance = np.sum(np.multiply(euclidean_distance, euclidean_distance))
+        euclidean_distance = np.sqrt(euclidean_distance)
+        return euclidean_distance
     
