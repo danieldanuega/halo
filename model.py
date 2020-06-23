@@ -31,6 +31,7 @@ def load_FbDeepFace():
     
     if os.path.isfile(model_path) != True:
         print("DeepFace weights by will be downloaded ")
+        os.makedirs(home + '/.deepface/weights')
         
         url = 'https://github.com/swghosh/DeepFace/releases/download/weights-vggface2-2d-aligned/VGGFace2_DeepFace_weights_val-0.9034.h5.zip'
         
