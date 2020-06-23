@@ -36,7 +36,7 @@ def load_FbDeepFace():
         
         output = model_path + '.zip'
         
-        gdown(url, output, quiet=False)
+        gdown.download(url, output, quiet=False)
         
         with zipfile.ZipFile(output, 'r') as z:
             z.extractall(home + '/.deepface/weights')
