@@ -1,15 +1,16 @@
-from model import load_FbDeepFace
 import os
 import pickle
 from tqdm import tqdm
 import helper
 import pandas as pd
 import numpy as np
+import helper
+import tensorflow as tf
 
 class FaceRecognition:
-    def __init__(self, database='./database'):
-        self.model = load_FbDeepFace()
+    def __init__(self, database='./database', model_path='./models/deepface_tensorrt.pb'):
         self.database = database
+        self.model = helper.loadPbGraph(model_path=model_path)
         
         # Check if the representations of employee faces is exist or not
         if os.path.isdir(self.database) == True:
@@ -58,13 +59,13 @@ class FaceRecognition:
                     
                     pbar.set_description('Finding embedding for {}'.format(employee))
                     
-                    shape = self.model.layers[0].input_shape
+                    shape = helper.FbDeepFaceInputShape()
                     
                     input_shape = shape[0][1:3] if type(shape) is list else shape[1:3]
                     input_shape_x = input_shape[0]; input_shape_y = input_shape[1]
                     
                     img = helper.detectFace(employee, (input_shape_y, input_shape_x), enforce_detection = True)
-                    representation = self.model.predict(img)[0,:]
+                    representation = FaceRecognition.tensorrtPredict(self.model, img)
                     
                     instance = []
                     instance.append(employee)
@@ -90,7 +91,7 @@ class FaceRecognition:
         
         df = pd.DataFrame(self.representations, columns=['identity', 'representation'])
         
-        target_representation = self.model.predict(img)[0,:]
+        target_representation = FaceRecognition.tensorrtPredict(self.model, img)
         
         distances = []
         for index, col in df.iterrows():
@@ -113,6 +114,20 @@ class FaceRecognition:
         person = df.iloc[0]['identity']
         name, sep, image_name = person[11::].partition('/')
         return name.capitalize()
+    
+    @staticmethod
+    def tensorrtPredict(model, img):
+        graph = tf.Graph()
+        with graph.as_default():
+            with tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.50))) as sess:
+                trt_graph = model
+                
+                tf.import_graph_def(trt_graph, name='')
+                input = sess.graph.get_tensor_by_name('C1_input:0')
+                output = sess.graph.get_tensor_by_name('F7/Relu:0')
+                
+                pred = sess.run(output, feed_dict={input: img})
+                return pred
     
     def __cosineDistance(self, origin, test):
         a = np.matmul(np.transpose(origin), test)

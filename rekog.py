@@ -85,8 +85,8 @@ while True:
                     2)
         
         # Predict
-        img = helper.detectFace(frame[y:y+h, x:x+w], get_input_shape(), stream=True)
-        if img.shape[1:3] == get_input_shape(): 
+        img = helper.detectFace(frame[y:y+h, x:x+w], helper.FbDeepFaceInputShape()[1:3], stream=True)
+        if img.shape[1:3] == helper.FbDeepFaceInputShape()[1:3]: 
             pred = FR.predict(img)
         
         # Draw label class prediction

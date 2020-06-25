@@ -3,6 +3,7 @@ tf.keras.backend.set_learning_phase(0) #use this if we have batch norm layer in 
 from tensorflow.keras.models import load_model
 from tensorflow.python.platform import gfile
 import tensorflow.contrib.tensorrt as trt
+import helper
 
 # Save into tensorflow model
 tf.compat.v1.disable_eager_execution()
@@ -34,9 +35,7 @@ with tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=tf.compat.
     print("Frozen model is successfully stored!")
     
     # Load frozen model from file
-    with open('./models/frozen_deepface.pb', 'rb') as f:
-        frozen_graph = tf.GraphDef()
-        frozen_graph.ParseFromString(f.read())
+    frozen_graph = helper.loadPbGraph('./models/frozen_deepface.pb')
 
     # convert (optimize) frozen model to TensorRT model
     trt_graph = trt.create_inference_graph(

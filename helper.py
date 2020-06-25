@@ -18,6 +18,15 @@ import tensorflow as tf
 import keras
 import asyncio
 
+def FbDeepFaceInputShape():
+    return (None,152,152)
+
+def loadPbGraph(model_path):
+    with open(model_path, 'rb') as f:
+        frozen_graph = tf.GraphDef()
+        frozen_graph.ParseFromString(f.read())
+    return frozen_graph
+
 def loadBase64Img(uri):
    encoded_data = uri.split(',')[1]
    nparr = np.fromstring(base64.b64decode(encoded_data), np.uint8)
