@@ -5,7 +5,6 @@ from pathlib import Path
 import zipfile
 import gdown
 import tensorflow as tf
-from tensorflow.python.compiler.tensorrt import trt_convert as trt
 from tensorflow.python.platform import gfile
 from tensorflow.keras.models import load_model
 
