@@ -50,7 +50,7 @@ def gstreamer_pipeline(
 FR = FaceRecognition()
 
 # Using webcam
-video = cv2.VideoCapture(2)
+video = cv2.VideoCapture(0)
 # Using gstreamer
 # video = cv2.VideoCapture(gstreamer_pipeline(), cv2.CAP_GSTREAMER)
 
@@ -87,15 +87,17 @@ while True:
         # Predict
         img = helper.detectFace(frame[y:y+h, x:x+w], get_input_shape(), stream=True)
         if img.shape[1:3] == get_input_shape(): 
-            pred = FR.predict(img)
+            pred, score = FR.predict(img)
+            score = "{:.2f}".format(score)
         
         # Draw label class prediction
-        cv2.rectangle(frame, (x, y+h + 35), (x+w, y+h), (0, 255, 0), cv2.FILLED)
+        cv2.rectangle(frame, (x, y+h + 65), (x+w, y+h), (0, 0, 0), cv2.FILLED)
         cv2.putText(frame, str(pred), (x + 3, y+h + 25), cv2.FONT_HERSHEY_DUPLEX, 0.8, (255, 255, 255), 1)
+        cv2.putText(frame, score, (x + 3, y+h + 55), cv2.FONT_HERSHEY_DUPLEX, 0.6, (255, 255, 255), 1)
 
     # Resize the display window
-    display_frame = cv2.resize(frame, (720,480))
-    cv2.imshow('Hello Welcome to iNews Tower', display_frame)
+    # display_frame = cv2.resize(frame, (1280,720))
+    cv2.imshow('Hello Welcome to iNews Tower', frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break

@@ -112,11 +112,13 @@ class FaceRecognition:
         print(df)
         
         if df.empty:
-            return "Employee doesn't exist"
+            return "Employee doesn't exist", ""
         
         person = df.iloc[0]['identity']
-        name, sep, image_name = person[11::].partition('/')
-        return name.capitalize()
+        confidence = df.iloc[0]['distances']
+        folder, sep, name_imageName = person[2::].partition('/')
+        name, sep, imageName = name_imageName.partition('/')
+        return name.capitalize(), confidence
     
     def __cosineDistance(self, origin, test):
         a = np.matmul(np.transpose(origin), test)
