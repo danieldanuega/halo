@@ -95,10 +95,14 @@ class FaceRecognition:
         distances = []
         for index, col in df.iterrows():
             source_representation = col['representation']
-            distance = self.__euclideanDistance(self.__l2_normalize(source_representation), self.__l2_normalize(target_representation))
+            # distance = self.__euclideanDistance(self.__l2_normalize(source_representation), self.__l2_normalize(target_representation))
+            # distance = self.__cosineDistance(source_representation, target_representation)
+            distance = self.__euclideanDistance(source_representation, target_representation)
             distances.append(distance)
         
-        threshold = helper.findThreshold('DeepFace', 'euclidean_l2')
+        # threshold = helper.findThreshold('DeepFace', 'euclidean_l2')
+        # threshold = helper.findThreshold('DeepFace', 'cosine')
+        threshold = helper.findThreshold('DeepFace', 'euclidean')
         
         df['distances'] = distances
         df = df.drop(columns=['representation'])

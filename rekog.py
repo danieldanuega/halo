@@ -50,7 +50,7 @@ def gstreamer_pipeline(
 FR = FaceRecognition()
 
 # Using webcam
-video = cv2.VideoCapture(0)
+video = cv2.VideoCapture(2)
 # Using gstreamer
 # video = cv2.VideoCapture(gstreamer_pipeline(), cv2.CAP_GSTREAMER)
 
@@ -93,7 +93,9 @@ while True:
         cv2.rectangle(frame, (x, y+h + 35), (x+w, y+h), (0, 255, 0), cv2.FILLED)
         cv2.putText(frame, str(pred), (x + 3, y+h + 25), cv2.FONT_HERSHEY_DUPLEX, 0.8, (255, 255, 255), 1)
 
-    cv2.imshow('Hello Welcome to iNews Tower', frame)
+    # Resize the display window
+    display_frame = cv2.resize(frame, (720,480))
+    cv2.imshow('Hello Welcome to iNews Tower', display_frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
