@@ -3,7 +3,11 @@ import os
 from model import load_FbDeepFace
 
 MODEL_VER = '1'
-SAVE_PATH = './models/tf_FbDeepFace'
+SAVE_PATH = f'{os.getcwd()}/models/tf_FbDeepFace'
+
+if os.path.exists(SAVE_PATH) == False:
+    os.makedirs(SAVE_PATH)
+    print('Path created!')
 
 print('Load model . . .')
 model = load_FbDeepFace()
