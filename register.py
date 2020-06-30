@@ -1,3 +1,6 @@
+# TODO: Change this algorithm for registering face into database
+# FIXME: use Haarscade openCV algorithm instead of MTCNN
+
 import cv2
 from mtcnn import MTCNN
 from PIL import Image

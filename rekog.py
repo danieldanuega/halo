@@ -5,19 +5,16 @@ import numpy as np
 from halo import FaceRecognition
 from model import get_input_shape
 import helper
+import time
 
-# n -> fps count
-# F -> desired framerate
-# i -> counter value for naming filename
-# n = 0
+# n -> freeze frames for n seconds
+# F -> camera fps
+# f -> current frame
 F = 30
-# i = 0
-# required_size = (224,224)
-# predFrame = [10,20,30]
-# model_path = "./models/model4-best"
-# model_name = "best_face_recognition.h5" 
-# lite_model_name = "best_lite_face_recognition.tflite"
-# class_name = "face_recognition_class_names.npy"
+n = F
+f = 0
+r = 0
+isFreeze = False
 
 def gstreamer_pipeline(
     capture_width=640,
@@ -72,9 +69,16 @@ while True:
     # rgb_small_frame = frame[:, :, ::-1]
 
     # Detect the face from rgb input
-    faces = helper.detectFacesLive(frame)
+    if isFreeze == True and 0 <= r <= 10:
+        faces = []
+        r += 1
+        print(f"r = {r}")
+    else:
+        faces = helper.detectFacesLive(frame)
+        r = 0
+        isFreeze = False
 
-    if len(faces) != 0 :
+    if len(faces) != 0:
         x, y, w, h = faces[0]
         
         # Draw rectangle in face
@@ -88,12 +92,23 @@ while True:
         img = helper.detectFace(frame[y:y+h, x:x+w], get_input_shape(), stream=True)
         if img.shape[1:3] == get_input_shape(): 
             pred, score = FR.predict(img)
-            score = "{:.2f}".format(score)
         
         # Draw label class prediction
         cv2.rectangle(frame, (x, y+h + 65), (x+w, y+h), (0, 0, 0), cv2.FILLED)
-        cv2.putText(frame, str(pred), (x + 3, y+h + 25), cv2.FONT_HERSHEY_DUPLEX, 0.8, (255, 255, 255), 1)
-        cv2.putText(frame, score, (x + 3, y+h + 55), cv2.FONT_HERSHEY_DUPLEX, 0.6, (255, 255, 255), 1)
+        cv2.putText(frame, f"{pred}", (x + 3, y+h + 25), cv2.FONT_HERSHEY_DUPLEX, 0.8, (255, 255, 255), 1)
+        cv2.putText(frame, f"{score:.2f}", (x + 3, y+h + 55), cv2.FONT_HERSHEY_DUPLEX, 0.6, (255, 255, 255), 1) if score != "" else ""
+        
+        # Count until freeze
+        f += 1
+        print(f"frame {f}")
+        # Freeze to show the predicted face
+        if f == n or score != "":
+            isFreeze = True
+            f = 0
+            freeze_img = frame.copy()
+            cv2.imshow("Result", freeze_img)
+            cv2.waitKey(3000)
+            cv2.destroyWindow("Result")
 
     # Resize the display window
     # display_frame = cv2.resize(frame, (1280,720))

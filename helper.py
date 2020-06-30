@@ -191,9 +191,17 @@ def detectFace(img, target_size=(224, 224), grayscale = False, enforce_detection
 
 	#-----------------------
 	
-	face_detector, eye_detector = load_opencv_detector()
- 
-	#-----------------------
+	opencv_path = get_opencv_path()
+	face_detector_path = opencv_path+"haarcascade_frontalface_default.xml"
+	eye_detector_path = opencv_path+"haarcascade_eye.xml"
+	
+	if os.path.isfile(face_detector_path) != True:
+		raise ValueError("Confirm that opencv is installed on your environment! Expected path ",face_detector_path," violated.")
+	
+	#--------------------------------
+	
+	face_detector = cv2.CascadeClassifier(face_detector_path)
+	eye_detector = cv2.CascadeClassifier(eye_detector_path)
 	
 	if base64_img == True:
 		img = loadBase64Img(img)
@@ -209,7 +217,12 @@ def detectFace(img, target_size=(224, 224), grayscale = False, enforce_detection
 	
 	#--------------------------------
 	
-	faces = face_detector.detectMultiScale(img, 1.3, 5)
+	faces = []
+	
+	try:
+		faces = face_detector.detectMultiScale(img, 1.3, 5)
+	except:
+		pass
 	
 	#print("found faces in ",image_path," is ",len(faces))
 	
@@ -277,24 +290,26 @@ def detectFace(img, target_size=(224, 224), grayscale = False, enforce_detection
 			#-----------------------
 			#apply cosine rule
 			
-			cos_a = (b*b + c*c - a*a)/(2*b*c)
-			angle = np.arccos(cos_a) #angle in radian
-			angle = (angle * 180) / math.pi #radian to degree
+			if b != 0 and c != 0: #this multiplication causes division by zero in cos_a calculation
 			
-			#-----------------------
-			#rotate base image
-			
-			if direction == -1:
-				angle = 90 - angle
-			
-			img = Image.fromarray(img_raw)
-			img = np.array(img.rotate(direction * angle))
-			
-			#you recover the base image and face detection disappeared. apply again.
-			faces = face_detector.detectMultiScale(img, 1.3, 5)
-			if len(faces) > 0:
-				x,y,w,h = faces[0]
-				detected_face = img[int(y):int(y+h), int(x):int(x+w)]
+				cos_a = (b*b + c*c - a*a)/(2*b*c)
+				angle = np.arccos(cos_a) #angle in radian
+				angle = (angle * 180) / math.pi #radian to degree
+				
+				#-----------------------
+				#rotate base image
+				
+				if direction == -1:
+					angle = 90 - angle
+				
+				img = Image.fromarray(img_raw)
+				img = np.array(img.rotate(direction * angle))
+				
+				#you recover the base image and face detection disappeared. apply again.
+				faces = face_detector.detectMultiScale(img, 1.3, 5)
+				if len(faces) > 0:
+					x,y,w,h = faces[0]
+					detected_face = img[int(y):int(y+h), int(x):int(x+w)]
 			
 			#-----------------------
 		
