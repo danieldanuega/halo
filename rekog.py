@@ -52,7 +52,7 @@ video = cv2.VideoCapture(0)
 # video = cv2.VideoCapture(gstreamer_pipeline(), cv2.CAP_GSTREAMER)
 
 if not video.isOpened():
-    print('Error opening the camera')
+    raise Exception('Error opening the camera')
 
 while True:
     # Open the camera
