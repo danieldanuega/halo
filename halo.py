@@ -112,7 +112,7 @@ class FaceRecognition:
         print(df)
         
         if df.empty:
-            return "Employee doesn't exist", ""
+            return "", ""
         
         person = df.iloc[0]['identity']
         confidence = df.iloc[0]['distances']

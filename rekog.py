@@ -106,6 +106,7 @@ while True:
             isFreeze = True
             f = 0
             freeze_img = frame.copy()
+            cv2.putText(freeze_img, "Not Employee!", (x + 3, y+h + 25), cv2.FONT_HERSHEY_DUPLEX, 0.8, (255, 255, 255), 1) if pred == "" else ""
             cv2.imshow("Result", freeze_img)
             cv2.waitKey(3000)
             cv2.destroyWindow("Result")
