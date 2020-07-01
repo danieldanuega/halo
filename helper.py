@@ -126,9 +126,9 @@ def findThreshold(model_name, distance_metric):
 		if distance_metric == 'cosine':
 			threshold = 0.23
 		elif distance_metric == 'euclidean':
-			threshold = 37.6
+			threshold = 35.6
 		elif distance_metric == 'euclidean_l2':
-			threshold = 0.50
+			threshold = 0.52
 	
 	elif model_name == 'DeepID':
 		if distance_metric == 'cosine':
