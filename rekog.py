@@ -68,7 +68,7 @@ while True:
     # small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
     # rgb_small_frame = frame[:, :, ::-1]
 
-    # Detect the face from rgb input
+    # When freeze don't analyze faces for 11 frames
     if isFreeze == True and 0 <= r <= 10:
         faces = []
         r += 1
