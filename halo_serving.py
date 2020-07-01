@@ -6,6 +6,7 @@ import helper
 import pandas as pd
 import numpy as np
 import requests
+import json
 
 URL = 'http://localhost:8501/v1/models/deepface/versions/1'
 
@@ -67,13 +68,15 @@ class FaceRecognition:
                     img = helper.detectFace(employee, (input_shape_y, input_shape_x), enforce_detection = True)
                     # Hit tensorflow serving REST api
                     try:
-                        # TODO: Fix how the input should be!
-                        res = requests.post(URL+':predict', data={"inputs": {"": img[0,:], "": img[0,:][0], "": img[0,:][1], "": img[0,:][2]}})
+                        data = json.dumps({
+                            "inputs": img.tolist()
+                        })
+                        res = requests.post(URL+':predict', data=data)
                     except requests.HTTPError as e:
                         raise e
                     
                     pred = res.json()
-                    representation = pred
+                    representation = np.array(pred['outputs'][0])
                     
                     instance = []
                     instance.append(employee)
@@ -101,12 +104,15 @@ class FaceRecognition:
         
         # Hit tensorflow serving REST api
         try:
-            res = requests.post(URL+':predict', data={"instances": img})
-            pred = res.json()
-        except Exception as err:
+            data = json.dumps({
+                "inputs": img.tolist()
+            })
+            res = requests.post(URL+':predict', data=data)
+        except requests.HTTPError as err:
             pred = err
         
-        target_representation = pred
+        pred = res.json()
+        target_representation = np.array(pred['outputs'][0])
         
         distances = []
         for index, col in df.iterrows():

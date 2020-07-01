@@ -2,7 +2,7 @@ import os
 import cv2
 from PIL import Image
 import numpy as np
-from halonline import FaceRecognition
+from halo_serving import FaceRecognition
 from model import get_input_shape
 import helper
 import time
@@ -107,9 +107,9 @@ while True:
             f = 0
             freeze_img = frame.copy()
             cv2.putText(freeze_img, "Not Employee!", (x + 3, y+h + 25), cv2.FONT_HERSHEY_DUPLEX, 0.8, (255, 255, 255), 1) if pred == "" else ""
-            cv2.imshow("Result", freeze_img)
+            cv2.imshow(f"Hello {pred}", freeze_img)
             cv2.waitKey(3000)
-            cv2.destroyWindow("Result")
+            cv2.destroyWindow(f"Hello {pred}")
 
     # Resize the display window
     # display_frame = cv2.resize(frame, (1280,720))
