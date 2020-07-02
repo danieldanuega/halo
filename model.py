@@ -1,12 +1,17 @@
 from tensorflow import keras
-from tensorflow.keras.layers import Dense, Conv2D, MaxPool2D, Flatten, Dropout, LocallyConnected2D
+from tensorflow.keras.layers import Dense, Conv2D, MaxPool2D, Flatten, Dropout, LocallyConnected2D, Add, Activation
 import os
 from pathlib import Path
 import zipfile
 import gdown
 
-def get_input_shape():
-    return (152,152)
+def get_input_shape(model_name='deepface'):
+    if model_name == 'deepface':
+        shape = (152,152)
+    elif model_name == 'deepid':
+        shape = (47,55)
+        
+    return shape
 
 def load_FbDeepFace():
     # model = keras.Sequential()
@@ -66,3 +71,31 @@ def load_FbDeepFace():
     
     return fb_deepface_model
     
+    def load_DeepId():
+        deepid_inputs = keras.Input(shape=(55,47,3), name='In1')
+        
+        x = Conv2D(filters=20, kernel_size=(4,4), name='Conv1', activation='relu', input_shape=(55,47,3))(deepid_inputs)
+        x = MaxPool2D(pool_size=2, strides=2, name='Pool1')(x)
+        x = Dropout(rate=1, name='D1')(x)
+        
+        x = Conv2D(filters=40, kernel_size=(3,3), name='Conv2', activation='relu')(x)
+        x = MaxPool2D(pool_size=2, strides=2, name='Pool2')(x)
+        x = Dropout(rate=1, name='D2')(x)
+        
+        x = Conv2D(filters=60, kernel_size=(3,3), name='Conv3', activation='relu')(x)
+        x = MaxPool2D(pool_size=2, strides=2, name='Pool3')(x)
+        x = Dropout(rate=1, name='D3')(x)
+        
+        x1 = Flatten()(x)
+        fc11 = Dense(160, name='fc11')(x1)
+        
+        x2 = Conv2D(filters=80, kernel_size=(2,2), name='Conv4', activation='relu')(x)
+        x2 = Flatten()(x2)
+        fc12 = Dense(160, name='fc12')(x2)
+        
+        y = Add()([fc11, fc12])
+        y = Activation('relu', name='deepid')(y)
+        
+        model = keras.Model(inputs=[deepface_inputs], outputs=y)
+        
+        # TODO: Downloads the weights and load it!

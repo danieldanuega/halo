@@ -1,4 +1,4 @@
-from model import load_FbDeepFace
+from model import load_FbDeepFace, load_DeepId
 import os
 import pickle
 from tqdm import tqdm
@@ -7,8 +7,12 @@ import pandas as pd
 import numpy as np
 
 class FaceRecognition:
-    def __init__(self, database='./database'):
-        self.model = load_FbDeepFace()
+    def __init__(self, database='./database', model_name='deepface'):
+        if model_name == 'deepface':
+            self.model = load_FbDeepFace()
+        elif model_name == 'deepid':
+            self.model = load_DeepId()
+            
         self.database = database
         
         # Check if the representations of employee faces is exist or not
