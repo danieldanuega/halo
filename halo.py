@@ -7,10 +7,11 @@ import pandas as pd
 import numpy as np
 
 class FaceRecognition:
-    def __init__(self, database='./database', model_name='deepface'):
-        if model_name == 'deepface':
+    def __init__(self, database='./database', model_name='DeepFace'):
+        self.model_name = model_name
+        if model_name == 'DeepFace':
             self.model = load_FbDeepFace()
-        elif model_name == 'deepid':
+        elif model_name == 'DeepID':
             self.model = load_DeepId()
             
         self.database = database
@@ -106,7 +107,7 @@ class FaceRecognition:
         
         # threshold = helper.findThreshold('DeepFace', 'euclidean_l2')
         # threshold = helper.findThreshold('DeepFace', 'cosine')
-        threshold = helper.findThreshold('DeepFace', 'euclidean')
+        threshold = helper.findThreshold(self.model_name, 'euclidean')
         
         df['distances'] = distances
         df = df.drop(columns=['representation'])

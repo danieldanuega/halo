@@ -2,7 +2,7 @@ import os
 import cv2
 from PIL import Image
 import numpy as np
-from halo_serving import FaceRecognition
+from halo import FaceRecognition
 from model import get_input_shape
 import helper
 import time
@@ -44,7 +44,7 @@ def gstreamer_pipeline(
     )
 
 # detector = MTCNN()
-FR = FaceRecognition()
+FR = FaceRecognition(model_name="DeepID")
 
 # Using webcam
 video = cv2.VideoCapture(0)
@@ -89,8 +89,8 @@ while True:
                     2)
         
         # Predict
-        img = helper.detectFace(frame[y:y+h, x:x+w], get_input_shape(), stream=True)
-        if img.shape[1:3] == get_input_shape(): 
+        img = helper.detectFace(frame[y:y+h, x:x+w], get_input_shape(model_name='DeepID')[::-1], stream=True)
+        if img.shape[1:3] == get_input_shape(model_name='DeepID'): 
             pred, score = FR.predict(img)
         
         # Draw label class prediction
