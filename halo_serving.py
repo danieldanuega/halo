@@ -8,7 +8,7 @@ import numpy as np
 import requests
 import json
 
-URL = 'http://localhost:8501/v1/models/deepface/versions/1'
+URL = 'http://10.3.189.64:8501/v1/models/deepface/versions/1'
 
 class FaceRecognition:
     def __init__(self, database='./database'):
