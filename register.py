@@ -2,8 +2,15 @@ import cv2
 import helper
 from model import get_input_shape
 from PIL import Image
+from datetime import datetime
+import os
 
-def register(file_path):
+now = datetime.now()
+this_time = now.strftime("%b-%d-%Y--%H:%M:%S")
+
+
+def register(database='./database', name='temp'):
+    file_path = os.path.join(database,name)
     r = 0
     R = 11
     isRegister = False
@@ -31,7 +38,9 @@ def register(file_path):
             r += 1
         elif len(faces) != 0 and r == R:
             r = 0
-            cv2.imwrite(file_path, frame)
+            if os.path.exists(file_path) == False:
+                os.makedirs(file_path)
+            cv2.imwrite(os.path.join(file_path, this_time), frame)
             isRegister = True
         else:
             r = 0
@@ -45,3 +54,6 @@ def register(file_path):
         
     video.release()
     cv2.destroyAllWindows()
+
+if __name__ == '__main__':
+    register(name='daniel')
