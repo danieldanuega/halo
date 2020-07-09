@@ -8,6 +8,8 @@ import os
 def register(database='./database', name='temp'):
     now = datetime.now()
     this_time = now.strftime("%b-%d-%Y--%H:%M:%S:%f")[:-3]
+    
+    minWidthFace = 200
 
     file_path = os.path.join(database,name)
     r = 0
@@ -24,7 +26,7 @@ def register(database='./database', name='temp'):
         
         faces = helper.detectFacesLive(frame)
         
-        if len(faces) != 0 and r != R:
+        if len(faces) != 0 and r != R and faces[0][2] >= minWidthFace:
             x, y, w, h = faces[0]
             
             # Draw rectangle in face
@@ -35,7 +37,7 @@ def register(database='./database', name='temp'):
                         2)
             
             r += 1
-        elif len(faces) != 0 and r == R:
+        elif len(faces) != 0 and r == R and faces[0][2] >= minWidthFace:
             r = 0
             if os.path.exists(file_path) == False:
                 os.makedirs(file_path)

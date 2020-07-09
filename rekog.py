@@ -46,6 +46,7 @@ def rekog():
     f = 0
     R = 0
     r = 180
+    minWidthFace = 200
     isFreeze = False
     
     
@@ -91,7 +92,7 @@ def rekog():
             R = 0
             isFreeze = False
 
-        if len(faces) != 0:
+        if len(faces) != 0 and faces[0][2] >= minWidthFace:
             x, y, w, h = faces[0]
             
             # Draw rectangle in face
