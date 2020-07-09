@@ -5,11 +5,10 @@ from PIL import Image
 from datetime import datetime
 import os
 
-now = datetime.now()
-this_time = now.strftime("%b-%d-%Y--%H:%M:%S")
-
-
 def register(database='./database', name='temp'):
+    now = datetime.now()
+    this_time = now.strftime("%b-%d-%Y--%H:%M:%S:%f")[:-3]
+
     file_path = os.path.join(database,name)
     r = 0
     R = 11
@@ -48,11 +47,13 @@ def register(database='./database', name='temp'):
         if isRegister:
             cv2.destroyWindow("Register Face")
             cv2.imshow("Register Success!", frame)
+            cv2.waitKey(3000)
             break
         else:
             cv2.imshow("Register Face", frame)
             
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        key = cv2.waitKey(1)
+        if key == ord('q'):
             break
         
     video.release()
