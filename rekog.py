@@ -10,10 +10,13 @@ import time
 # n -> freeze frames for n seconds
 # F -> camera fps
 # f -> current frame
+# R -> wait time 
+# r -> radius
 F = 30
 n = F
 f = 0
-r = 0
+R = 0
+r = 180
 isFreeze = False
 
 def gstreamer_pipeline(
@@ -54,65 +57,75 @@ video = cv2.VideoCapture(0)
 if not video.isOpened():
     raise Exception('Error opening the camera')
 
+# Open the camera and get the camera size
+ret, temp = video.read()
+
+# convert image to grayscale image
+gray_image = cv2.cvtColor(temp, cv2.COLOR_BGR2GRAY)
+# convert the grayscale image to binary image
+ret,thresh = cv2.threshold(gray_image,127,255,0)
+# calculate moments of binary image
+M = cv2.moments(thresh)
+# calculate x,y coordinate of center
+CX = int(M["m10"] / M["m00"])
+CY = int(M["m01"] / M["m00"])
+
 while True:
-    # Open the camera
+    # Open camera for recognizing
     ret, frame = video.read()
-
-    # if n == F:
-    #     n = 0
-
-    # n += 1
-    # i += 1
-    # if n in predFrame:
-    # Resize the frame size and convert it to RGB Color
-    # small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
-    # rgb_small_frame = frame[:, :, ::-1]
+    rekog_frame = frame[CY-r:CY+r, CX-r:CX+r]
+    
+    # Draw rekog circle
+    cv2.circle(frame, center=(CX,CY), radius=r, color=(243,144,29), thickness=3)
 
     # When freeze don't analyze faces for 11 frames
-    if isFreeze == True and 0 <= r <= 10:
+    if isFreeze == True and 0 <= R <= 10:
         faces = []
-        r += 1
-        print(f"r = {r}")
+        R += 1
+        print(f"R = {R}")
     else:
-        faces = helper.detectFacesLive(frame)
-        r = 0
+        faces = helper.detectFacesLive(rekog_frame)
+        R = 0
         isFreeze = False
 
     if len(faces) != 0:
         x, y, w, h = faces[0]
         
         # Draw rectangle in face
-        cv2.rectangle(frame,
+        cv2.rectangle(rekog_frame,
                     (x, y),
                     (x+w, y+h),
                     (0,155,255),
                     2)
         
         # Predict
-        img = helper.detectFace(frame[y:y+h, x:x+w], get_input_shape(), stream=True)
+        img = helper.detectFace(rekog_frame[y:y+h, x:x+w], get_input_shape(), stream=True)
         if img.shape[1:3] == get_input_shape(): 
             pred, score = FR.predict(img)
-        
-        # Draw label class prediction
-        cv2.rectangle(frame, (x, y+h + 65), (x+w, y+h), (0, 0, 0), cv2.FILLED)
-        cv2.putText(frame, f"{pred}", (x + 3, y+h + 25), cv2.FONT_HERSHEY_DUPLEX, 0.8, (255, 255, 255), 1)
-        cv2.putText(frame, f"{score:.2f}", (x + 3, y+h + 55), cv2.FONT_HERSHEY_DUPLEX, 0.6, (255, 255, 255), 1) if score != "" else ""
         
         # Count until freeze
         f += 1
         print(f"frame {f}")
+        
         # Freeze to show the predicted face
         if f == n or score != "":
             isFreeze = True
             f = 0
-            freeze_img = frame.copy()
-            cv2.putText(freeze_img, "Not Employee!", (x + 3, y+h + 25), cv2.FONT_HERSHEY_DUPLEX, 0.8, (255, 255, 255), 1) if pred == "" else ""
+            freeze_img = rekog_frame.copy()
+            # Draw label class prediction
+            cv2.rectangle(freeze_img, (x, y+h + 65), (x+w, y+h), (0, 0, 0), cv2.FILLED)
+            if pred == "":
+                cv2.rectangle(freeze_img, (x, y), (x+w, y+h), (0,155,255), cv2.FILLED)
+                cv2.putText(freeze_img, "Not Employee!", (x + 3, y+h + 25), cv2.FONT_HERSHEY_DUPLEX, 0.8, (255, 255, 255), 1)
+            elif pred != "":
+                cv2.putText(freeze_img, f"{pred}", (x + 3, y+h + 25), cv2.FONT_HERSHEY_DUPLEX, 0.8, (255, 255, 255), 1)
+                cv2.putText(freeze_img, f"{score:.2f}", (x + 3, y+h + 55), cv2.FONT_HERSHEY_DUPLEX, 0.6, (255, 255, 255), 1)
+            else:
+                None
             cv2.imshow(f"Hello {pred}", freeze_img)
             cv2.waitKey(3000)
             cv2.destroyWindow(f"Hello {pred}")
 
-    # Resize the display window
-    # display_frame = cv2.resize(frame, (1280,720))
     cv2.imshow('Hello Welcome to iNews Tower', frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
