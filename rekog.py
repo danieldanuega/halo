@@ -137,7 +137,8 @@ def rekog():
         elif key == ord('r'):
             video.release()
             cv2.destroyAllWindows()
-            register(name='daniel')
+            name = input("Enter your name: ")
+            register(name=name)
             rekog()
 
     video.release()
