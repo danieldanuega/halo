@@ -40,7 +40,7 @@ def register(database='./database', name='temp'):
             r = 0
             if os.path.exists(file_path) == False:
                 os.makedirs(file_path)
-            cv2.imwrite(os.path.join(file_path, this_time), frame)
+            cv2.imwrite(os.path.join(file_path, this_time)+'.jpg', frame)
             isRegister = True
         else:
             r = 0
@@ -51,9 +51,9 @@ def register(database='./database', name='temp'):
             break
         else:
             cv2.imshow("Register Face", frame)
+            
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
         
     video.release()
     cv2.destroyAllWindows()
-
-if __name__ == '__main__':
-    register(name='daniel')
