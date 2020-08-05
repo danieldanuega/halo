@@ -2,7 +2,7 @@ import os
 import cv2
 from PIL import Image
 import numpy as np
-from halo_serving import FaceRecognition
+from halo import FaceRecognition
 from model import get_input_shape
 import helper
 import time
