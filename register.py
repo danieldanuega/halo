@@ -1,7 +1,5 @@
 import cv2
 import helper
-from model import get_input_shape
-from PIL import Image
 from datetime import datetime
 import os
 
@@ -23,7 +21,7 @@ def register(database="./database", name="temp"):
         raise Exception("Error opening the camera")
 
     while True:
-        ret, frame = video.read()
+        _, frame = video.read()
 
         faces = helper.detectFacesLive(frame)
 

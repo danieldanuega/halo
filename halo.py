@@ -159,3 +159,8 @@ class FaceRecognition:
         euclidean_distance = np.sum(np.multiply(euclidean_distance, euclidean_distance))
         euclidean_distance = np.sqrt(euclidean_distance)
         return euclidean_distance
+
+    def __hyperplaneSimilarity(
+        self, source_representation, test_representation, negative_representation
+    ):
+        return None
