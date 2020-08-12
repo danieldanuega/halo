@@ -2,6 +2,9 @@
 
 Face identification system built on top of Facebook DeepFace model and openCV.
 
+## Dependencies
+- **halo-services**
+
 ## About
 
 This project is an employee attendees system to identify employees face when they come to office. This repo is a standalone system for offline and semi-online identification solution. Also this repo contains the model creation by using tensorflow 2 and keras model. This project inspired by serengil/deepface project.
