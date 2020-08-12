@@ -3,7 +3,8 @@
 Face identification system built on top of Facebook DeepFace model and openCV.
 
 ## Dependencies
-- **halo-services**
+- Offline = -
+- Semi-Online = **halo-services**
 
 ## About
 
