@@ -20,6 +20,7 @@ This repo has 2 solutions:
 ## Usage
 
 1. Install the requirements using `pip install -r requirements.txt`.
-2. The default solution for this project is **Offline** solution. If you want to use **Semi-Online** solution, please change the import statement in `rekog.py` from  `from halo import FaceRecognition` --> `from halo_serving import FaceRecognition`.
-3. Run the recognition script `python rekog.py` to start live verification based on the faces in `database` folder.
+2. Add database folder on root project.
+3. The default solution for this project is **Offline** solution. If you want to use **Semi-Online** solution, please change the import statement in `rekog.py` from  `from halo import FaceRecognition` --> `from halo_serving import FaceRecognition`.
+4. Run the recognition script `python rekog.py` to start live verification based on the faces in `database` folder.
  
